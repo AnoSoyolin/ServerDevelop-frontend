@@ -39,7 +39,14 @@ function getCouponDetail() {
 }
 
 function handleReceive() {
-  console.log("dnwoiendw")
+  if (amount.value<=0){
+    ElMessage({
+      message: "优惠券已领完",
+      type: 'error',
+      center: true,
+    })
+    return
+  }
   const couponInfo = {
     userId:userId,
     type: type.value,

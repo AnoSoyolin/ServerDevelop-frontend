@@ -4,7 +4,6 @@ import {COUPON_MODULE} from './_prefix'
 type CouponGroupInfo = {
     amount: number,
     storeId: number,
-    userId: number,
     type: string,
     Full: number,
     Reduction: number,
@@ -13,7 +12,7 @@ type CouponGroupInfo = {
 type CouponInfo = {
     userId: number,
     storeId: number,
-    couponGroupId: number,
+    groupId: number,
     type : string;
     Full: number,
     Reduction: number,

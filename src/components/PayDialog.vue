@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {ref} from "vue"
-import {getOrderById, payOrder} from "../api/order.ts"
+import {getOrderById, payOrder,getPrice} from "../api/order.ts"
+import {getCouponsByUserId} from "../api/coupon.ts";
 import {parseOrderType} from "../utils"
 
 const saveOrderId = ref(0)
@@ -20,10 +21,25 @@ defineExpose({
   open
 })
 
+interface conpon {
+  id:number,
+  storeId:number,
+  userId:number,
+  couponGroupId:number,
+  type:string,
+  full:number,
+  reduction:number,
+  isUsed:boolean
+}
+
 const amount = ref(0)
 const price = ref(0)
 const type = ref('')
 const totalPrice = ref(0)
+const realPrice = ref(0)
+const coupons = ref<conpon[]>([])
+const userId = (Number)(sessionStorage.getItem("userId"))
+const couponId = ref(undefined)
 
 function getOrderDetail(orderId: number) {
   getOrderById(orderId).then(res => {
@@ -57,6 +73,20 @@ function handleConfirmOrder() {
     orderDialogVisible.value = false
   })
 }
+
+function getAllCoupon() {
+  getCouponsByUserId(userId).then(res => {
+    coupons.value = res.data.result
+  })
+}
+
+function getRealPrice() {
+  getPrice(userId, saveOrderId.value).then(res => {
+    realPrice.value = res.data.result
+  })
+}
+
+getAllCoupon();
 </script>
 
 
@@ -82,10 +112,23 @@ function handleConfirmOrder() {
         </el-form-item>
 
         <el-form-item>
-          <label for="type">优惠券：</label>
+          <label>优惠券：</label>
+          <el-select v-model="couponId" placeholder="请选择优惠券" @change = getRealPrice >
+            <el-option
+                value=0
+                label="不使用优惠券"
+            ></el-option>
+            <el-option
+                v-for="item in coupons"
+                :key="item.id"
+                :label="`满${item.full}减${item.reduction}`"
+                :value="item.id"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item>
           <label>折扣后金额：</label>
+          {{ realPrice }} 元
         </el-form-item>
 
       </el-form>

@@ -81,13 +81,12 @@ function handleConfirmOrder() {
           {{ totalPrice }} 元
         </el-form-item>
 
-        <!--你可能会在这里添入优惠券的选用、并展示折扣后总价-->
-<!--        <el-form-item>-->
-<!--          <label for="type">优惠券：</label>-->
-<!--        </el-form-item>-->
-<!--        <el-form-item>-->
-<!--          <label>折扣后金额：</label>-->
-<!--        </el-form-item>-->
+        <el-form-item>
+          <label for="type">优惠券：</label>
+        </el-form-item>
+        <el-form-item>
+          <label>折扣后金额：</label>
+        </el-form-item>
 
       </el-form>
 

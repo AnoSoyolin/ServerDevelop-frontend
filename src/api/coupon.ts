@@ -4,6 +4,7 @@ import {COUPON_MODULE} from './_prefix'
 type CouponGroupInfo = {
     amount: number,
     storeId: number,
+    userId: number,
     type: string,
     Full: number,
     Reduction: number,
@@ -12,14 +13,14 @@ type CouponGroupInfo = {
 type CouponInfo = {
     userId: number,
     storeId: number,
-    groupId: number,
+    couponGroupId: number,
     type : string;
     Full: number,
     Reduction: number,
 }
 
 export const createGroup = (couponGroupInfo: CouponGroupInfo) => {
-    return axios.post(`${COUPON_MODULE}/`, couponGroupInfo,
+    return axios.post(`${COUPON_MODULE}/createGroup`, couponGroupInfo,
         {headers: {'Content-Type': 'application/json'}})
         .then(res => {
             return res
@@ -49,8 +50,8 @@ export const getCouponsByUserId = (userId: number) => {
         })
 }
 
-export const getGroupByGroupId = (couponId: number) => {
-    return axios.get(`${COUPON_MODULE}/${couponId}`)
+export const getGroupByGroupId = (groupId: number) => {
+    return axios.get(`${COUPON_MODULE}/${groupId}`)
         .then(res => {
             return res
         })

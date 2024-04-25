@@ -39,6 +39,7 @@ function handleLogin() {
       userInfo().then(res => {
         sessionStorage.setItem('name', res.data.result.name)
         sessionStorage.setItem('role', res.data.result.role)
+        sessionStorage.setItem('userId', res.data.result.id)
         if (res.data.result.role === 'STAFF') {
           sessionStorage.setItem('storeId', res.data.result.storeId)
         }

@@ -20,7 +20,7 @@ type CouponInfo = {
 }
 
 export const createGroup = (couponGroupInfo: CouponGroupInfo) => {
-    return axios.post(`${COUPON_MODULE}/`, couponGroupInfo,
+    return axios.post(`${COUPON_MODULE}/createGroup`, couponGroupInfo,
         {headers: {'Content-Type': 'application/json'}})
         .then(res => {
             return res
@@ -50,8 +50,8 @@ export const getCouponsByUserId = (userId: number) => {
         })
 }
 
-export const getCouponsByCouponId = (couponId: number) => {
-    return axios.get(`${COUPON_MODULE}/${couponId}`)
+export const getGroupByGroupId = (groupId: number) => {
+    return axios.get(`${COUPON_MODULE}/${groupId}`)
         .then(res => {
             return res
         })

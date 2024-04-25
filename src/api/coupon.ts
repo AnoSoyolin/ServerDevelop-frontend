@@ -42,3 +42,17 @@ export const receiveCoupon = (couponInfo:CouponInfo) => {
             return res
         })
 }
+
+export const getCouponsByUserId = (userId: number) => {
+    return axios.get(`${COUPON_MODULE}/user/${userId}`)
+        .then(res => {
+            return res
+        })
+}
+
+export const getCouponsByCouponId = (couponId: number) => {
+    return axios.get(`${COUPON_MODULE}/${couponId}`)
+        .then(res => {
+            return res
+        })
+}

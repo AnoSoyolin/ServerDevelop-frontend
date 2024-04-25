@@ -69,3 +69,10 @@ export const commentOrder = (commentInfo: CommentInfo) => {
             return res
         })
 }
+
+export const getPrice = (orderId: number,couponId: number) => {
+    return axios.get(`${ORDER_MODULE}/getPrice/?orderId=${orderId}&couponId=${couponId}`)
+        .then(res => {
+            return res
+        })
+}

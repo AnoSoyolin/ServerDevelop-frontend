@@ -8,8 +8,8 @@ const amount=ref(0)
 let storeId=ref(0);
 storeId=ref(0)
 const type = ref('')
-const Full=ref(0)
-const Reduction=ref(0)
+const full=ref(0)
+const reduction=ref(0)
 const groupList = ref()
 if (role==="STAFF"){
   storeId.value=Number(sessionStorage.getItem("storeId"))
@@ -29,12 +29,12 @@ function createNewGroup() {
     amount: amount.value,
     storeId: storeId.value,
     type: type.value,
-    Full: Full.value,
-    Reduction: Reduction.value,
+    full: full.value,
+    reduction: reduction.value,
   }).then(res => {
     if (res.data.code === '000') {
       ElMessage({
-        message: '创建订单成功！',
+        message: '发布优惠券成功！',
         type: 'success',
         center: true,
       })
@@ -52,7 +52,7 @@ function createNewGroup() {
 
 
 <template>
-  <el-button @click="openCouponDialog" type="primary" plain>
+  <el-button v-if="role!='CUSTOMER'" @click="openCouponDialog" type="primary" class="button" plain>
     发布优惠券
   </el-button>
   <el-dialog
@@ -63,7 +63,7 @@ function createNewGroup() {
 
     <el-form label-position="top">
       <el-form-item label="优惠券数量">
-        <el-input-number v-model="amount" :min="1" :max="stock" label="购买数量"></el-input-number>
+        <el-input-number v-model="amount" :min="1"  label="购买数量"></el-input-number>
       </el-form-item>
       <el-form-item label="优惠券类型">
         <el-radio-group v-model="type">
@@ -72,10 +72,10 @@ function createNewGroup() {
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="type==='FULL_REDUCTION'" label="使用限额">
-        <el-input-number v-model="Full" placeholder="使用限额"></el-input-number>
+        <el-input-number v-model="full" placeholder="使用限额"></el-input-number>
       </el-form-item>
       <el-form-item v-if="type==='FULL_REDUCTION'" label="减免金额">
-        <el-input-number v-model="Reduction" placeholder="减免金额"></el-input-number>
+        <el-input-number v-model="reduction" placeholder="减免金额"></el-input-number>
       </el-form-item>
     </el-form>
 
@@ -100,4 +100,10 @@ function createNewGroup() {
   flex-flow: wrap;
   justify-content: center;
 }
+.button{
+  width: 10%;
+  margin-left: 40px;
+  margin-top: 20px;
+}
+
 </style>

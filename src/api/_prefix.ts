@@ -11,4 +11,4 @@ export const PRODUCT_MODULE = `${API_MODULE}/products`
 export const ORDER_MODULE= `${API_MODULE}/orders`
 
 //Lab4新增
-//需要添加优惠券模块的api
+export const COUPON_MODULE= `${API_MODULE}/coupons`

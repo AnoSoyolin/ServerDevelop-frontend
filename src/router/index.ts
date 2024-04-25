@@ -68,9 +68,14 @@ const router = createRouter({
                     title: '全部订单',
                 }
             },
-
-        //  如果优惠券模块有新增界面，记得添加在这里
-
+            {
+                path: '/allCoupon',
+                name: 'allCoupon',
+                component: () => import('../views/coupon/AllCoupon.vue'),
+                meta: {
+                    title: '全部优惠券',
+                }
+            },
         ]
     }, {
         path: '/404',

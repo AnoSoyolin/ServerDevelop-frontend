@@ -189,9 +189,7 @@ const statusText = computed(() => {
       </div>
     </template>
 
-    <el-descriptions
-        :column="1"
-    >
+    <el-descriptions :column="1">
       <el-descriptions-item style="font-size: 15px" label="商品">
         {{ productName }}
       </el-descriptions-item>

@@ -5,8 +5,8 @@ type CouponGroupInfo = {
     amount: number,
     storeId: number,
     type: string,
-    Full: number,
-    Reduction: number,
+    full: number,
+    reduction: number,
 }
 
 type CouponInfo = {
@@ -14,8 +14,8 @@ type CouponInfo = {
     storeId: number,
     groupId: number,
     type : string;
-    Full: number,
-    Reduction: number,
+    full: number,
+    reduction: number,
 }
 
 export const createGroup = (couponGroupInfo: CouponGroupInfo) => {

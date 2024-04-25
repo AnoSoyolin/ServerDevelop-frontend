@@ -19,9 +19,10 @@ const reduction = ref(0)
 const storeName = ref('')
 const userId = Number(sessionStorage.getItem("userId"))
 getCouponDetail()
-
+console.log(props.groupId)
 function getCouponDetail() {
   getGroupByGroupId(props.groupId).then(res => {
+    console.log(props.groupId)
     amount.value = res.data.result.amount
     type.value = res.data.result.type
     storeId.value = res.data.result.storeId
@@ -38,13 +39,14 @@ function getCouponDetail() {
 }
 
 function handleReceive() {
+  console.log("dnwoiendw")
   const couponInfo = {
     userId:userId,
     type: type.value,
     storeId: storeId.value,
-    Full: full.value,
+    full: full.value,
     groupId: props.groupId,
-    Reduction: reduction.value,
+    reduction: reduction.value,
   }
   receiveCoupon(couponInfo).then(res => {
     if (res.data.code === '000') {
@@ -69,18 +71,23 @@ function handleReceive() {
 
 <template>
   <el-card class="coupon-item-card" shadow="hover">
-    <el-descriptions-item style="font-size: 15px" label="优惠券类别">
-      优惠券类别：{{ type }}
+    <el-descriptions :column="1">
+    <el-descriptions-item style="font-size: 15px" label="优惠券类别:">
+      {{ type }}
     </el-descriptions-item>
-    <el-descriptions-item style="font-size: 15px" label="优惠券详情">
-      优惠券详情：满{{ full }}减{{ reduction }}
+    <el-descriptions-item v-if="type!='SPECIAL'" style="font-size: 15px" label="优惠券详情:">
+      满{{ full }}元减{{ reduction }}元
     </el-descriptions-item>
-    <el-descriptions-item style="font-size: 15px" label="总价">
-      可用商店：{{ storeName }}
+    <el-descriptions-item style="font-size: 15px" label="可用商店：">
+      {{ storeName }}
     </el-descriptions-item>
-    <el-descriptions-item style="font-size: 15px" label="剩余数量">
-      剩余数量：{{ amount }}
+    <el-descriptions-item style="font-size: 15px" label="剩余数量：">
+      {{ amount }}
     </el-descriptions-item>
+      <el-descriptions-item v-if="type==='SPECIAL'">
+        <br>
+      </el-descriptions-item>
+    </el-descriptions>
     <el-button @click="handleReceive" class="receive-button" size="small" type="primary">
       领取
     </el-button>

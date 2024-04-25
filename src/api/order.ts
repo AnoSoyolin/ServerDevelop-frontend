@@ -23,8 +23,8 @@ export const createOrder = (orderInfo: OrderInfo) => {
 }
 
 // 订单支付（你可能需要修改这个方法，把优惠券加进来）
-export const payOrder = (orderId: number) => {
-    return axios.post(`${ORDER_MODULE}/pay/?orderId=${orderId}`)
+export const payOrder = (orderId: number,couponId:number) => {
+    return axios.post(`${ORDER_MODULE}/pay/?orderId=${orderId}&couponId=${couponId}`)
         .then(res => {
             return res
         })

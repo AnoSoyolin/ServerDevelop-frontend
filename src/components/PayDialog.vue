@@ -21,7 +21,7 @@ defineExpose({
   open
 })
 
-interface conpon {
+interface coupon {
   id:number,
   storeId:number,
   userId:number,
@@ -29,7 +29,7 @@ interface conpon {
   type:string,
   full:number,
   reduction:number,
-  isUsed:boolean
+  used:boolean
 }
 
 const amount = ref(0)
@@ -37,9 +37,9 @@ const price = ref(0)
 const type = ref('')
 const totalPrice = ref(0)
 const realPrice = ref(0)
-const coupons = ref<conpon[]>([])
+const coupons = ref<coupon[]>([])
 const userId = (Number)(sessionStorage.getItem("userId"))
-const couponId = ref(undefined)
+const couponId = ref(0)
 
 function getOrderDetail(orderId: number) {
   getOrderById(orderId).then(res => {
@@ -48,11 +48,12 @@ function getOrderDetail(orderId: number) {
     price.value = res.data.result.price
     //根据商品单价和购买数量计算总价
     totalPrice.value = price.value * amount.value
+    getRealPrice(0)
   })
 }
 
 function handleConfirmOrder() {
-  payOrder(saveOrderId.value).then(res => {
+  payOrder(saveOrderId.value,couponId.value).then(res => {
     if (res.data.code === '000') {
       ElMessage({
         message: '订单支付成功！',
@@ -80,8 +81,8 @@ function getAllCoupon() {
   })
 }
 
-function getRealPrice() {
-  getPrice(userId, saveOrderId.value).then(res => {
+function getRealPrice(couponId: number) {
+  getPrice(saveOrderId.value,couponId).then(res => {
     realPrice.value = res.data.result
   })
 }
@@ -113,17 +114,27 @@ getAllCoupon();
 
         <el-form-item>
           <label>优惠券：</label>
-          <el-select v-model="couponId" placeholder="请选择优惠券" @change = getRealPrice >
+          <el-select v-model="couponId" placeholder="请选择优惠券" @change = "getRealPrice(couponId)" >
             <el-option
                 value=0
                 label="不使用优惠券"
             ></el-option>
-            <el-option
-                v-for="item in coupons"
-                :key="item.id"
-                :label="`满${item.full}减${item.reduction}`"
-                :value="item.id"
-            ></el-option>
+            <div v-for="coupon in coupons" :key="coupon.id">
+              <div v-if="coupon.type === 'FULL_REDUCTION' && !coupon.used">
+                <el-option
+                    :label="`满${coupon.full}减${coupon.reduction}`"
+                    :value="coupon.id"
+                ></el-option>
+              </div>
+            </div>
+            <div v-for="coupon in coupons" :key="coupon.id">
+              <div v-if="coupon.type === 'SPECIAL' && !coupon.used">
+                <el-option
+                    :label="`蓝鲸券`"
+                    :value="coupon.id"
+                ></el-option>
+              </div>
+            </div>
           </el-select>
         </el-form-item>
         <el-form-item>

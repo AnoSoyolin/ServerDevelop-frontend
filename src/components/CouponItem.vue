@@ -169,5 +169,6 @@ function handleReceive() {
 }
 .no-border-button {
   border: none;
+  width: 55px;
 }
 </style>

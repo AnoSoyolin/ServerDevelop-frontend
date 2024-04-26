@@ -95,7 +95,7 @@ function handleReceive() {
 
 
 <template>
-  <el-card v-if="role==='MANAGER'||storeId===roleStoreId||storeId===0" class="coupon-item-card" shadow="hover">
+  <el-card v-if="role!='STAFF'||storeId===roleStoreId||storeId===0" class="coupon-item-card" shadow="hover">
     <el-descriptions :column="1">
       <el-descriptions-item v-if="type!='SPECIAL'" style="font-size: 15px" label="优惠券类别:">
         <el-tooltip placement="top">

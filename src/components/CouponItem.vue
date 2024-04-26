@@ -39,7 +39,6 @@ function getCouponDetail() {
 }
 
 function handleReceive() {
-  console.log("dnwoiendw")
   const couponInfo = {
     userId:userId,
     type: type.value,

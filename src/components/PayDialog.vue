@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {ref} from "vue"
 import {getOrderById, payOrder,getPrice} from "../api/order.ts"
-import {getCouponsByUserId} from "../api/coupon.ts";
+import {getAvailableCoupons} from "../api/coupon.ts";
 import {parseOrderType} from "../utils"
 
 const saveOrderId = ref(0)
@@ -41,6 +41,7 @@ const coupons = ref<coupon[]>([])
 const userId = (Number)(sessionStorage.getItem("userId"))
 const couponId = ref(0)
 
+
 function getOrderDetail(orderId: number) {
   getOrderById(orderId).then(res => {
     amount.value = res.data.result.amount
@@ -48,7 +49,8 @@ function getOrderDetail(orderId: number) {
     price.value = res.data.result.price
     //根据商品单价和购买数量计算总价
     totalPrice.value = price.value * amount.value
-    getRealPrice(0)
+    getRealPrice(0);
+    getAllCoupon();
   })
 }
 
@@ -76,7 +78,7 @@ function handleConfirmOrder() {
 }
 
 function getAllCoupon() {
-  getCouponsByUserId(userId).then(res => {
+  getAvailableCoupons(userId,saveOrderId.value).then(res => {
     coupons.value = res.data.result
   })
 }
@@ -87,7 +89,6 @@ function getRealPrice(couponId: number) {
   })
 }
 
-getAllCoupon();
 </script>
 
 
@@ -114,13 +115,13 @@ getAllCoupon();
 
         <el-form-item>
           <label>优惠券：</label>
-          <el-select v-model="couponId" placeholder="请选择优惠券" @change = "getRealPrice(couponId)" >
+          <el-select v-model="couponId" @change = "getRealPrice(couponId)" >
             <el-option
-                value=0
-                label="不使用优惠券"
+                :label="`不使用优惠券`"
+                :value="0"
             ></el-option>
             <div v-for="coupon in coupons" :key="coupon.id">
-              <div v-if="coupon.type === 'FULL_REDUCTION' && !coupon.used">
+              <div v-if="coupon.type === 'FULL_REDUCTION' && coupon.full <= price && !coupon.used">
                 <el-option
                     :label="`满${coupon.full}减${coupon.reduction}`"
                     :value="coupon.id"

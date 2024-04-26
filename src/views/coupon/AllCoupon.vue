@@ -25,6 +25,17 @@ function openCouponDialog() {
   couponDialogVisible.value = true;
 }
 function createNewGroup() {
+  if(type.value==="FULL_REDUCTION"){
+    if (full.value<=0||reduction.value<=0){
+      ElMessage({
+        message: '请填写正确的信息！',
+        type: 'error',
+        center: true,
+      })
+      return
+    }
+
+  }
   createGroup({
     amount: amount.value,
     storeId: storeId.value,

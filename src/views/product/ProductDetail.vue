@@ -236,7 +236,6 @@ function toBackPage() {
       </div>
     </el-main>
 
-    <!--支付弹窗组件-->
     <PayDialog ref="dialogRef"/>
   </el-container>
 </template>

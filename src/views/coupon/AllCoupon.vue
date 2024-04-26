@@ -84,10 +84,10 @@ function createNewGroup() {
       <el-button type="primary" @click="createNewGroup">确 定</el-button>
     </div>
   </el-dialog>
+
   <el-main>
     <div class="group-item-list">
-      <CouponItem
-          v-for="groupVO in groupList" :groupId="groupVO.id"/>
+      <CouponItem v-for="groupVO in groupList" :groupId="groupVO.id"/>
     </div>
   </el-main>
 </template>

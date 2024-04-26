@@ -121,7 +121,7 @@ function getRealPrice(couponId: number) {
                 :value="0"
             ></el-option>
             <div v-for="coupon in coupons" :key="coupon.id">
-              <div v-if="coupon.type === 'FULL_REDUCTION' && coupon.full <= price && !coupon.used">
+              <div v-if="coupon.type === 'FULL_REDUCTION' && coupon.full <= price * amount && !coupon.used">
                 <el-option
                     :label="`满${coupon.full}减${coupon.reduction}`"
                     :value="coupon.id"

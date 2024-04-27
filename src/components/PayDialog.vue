@@ -85,7 +85,7 @@ function getAllCoupon() {
 
 function getRealPrice(couponId: number) {
   getPrice(saveOrderId.value,couponId).then(res => {
-    realPrice.value = res.data.result
+    realPrice.value = res.data.result.toFixed(2)
   })
 }
 

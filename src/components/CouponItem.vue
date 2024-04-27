@@ -108,7 +108,7 @@ function handleReceive() {
 <template>
   <el-card v-if="role!='STAFF'||storeId===roleStoreId||storeId===0" class="coupon-item-card" shadow="hover">
     <el-descriptions :column="1">
-      <el-descriptions-item v-if="type!='SPECIAL'" style="font-size: 15px" label="优惠券类别:">
+      <el-descriptions-item v-if="type==='SPECIAL'" style="font-size: 15px" label="优惠券类别:">
         <el-tooltip placement="top">
           <template #content> 0-100元区间打九五折；<br>
             100-200元区间打九折；<br>
@@ -119,7 +119,7 @@ function handleReceive() {
           <el-button class="no-border-button">蓝鲸券 </el-button>
         </el-tooltip>
       </el-descriptions-item>
-      <el-descriptions-item v-if="type!='FULL_REDUCTION'" style="font-size: 15px" label="优惠券类别:">
+      <el-descriptions-item v-if="type==='FULL_REDUCTION'" style="font-size: 15px" label="优惠券类别:">
         满减券
       </el-descriptions-item>
     <el-descriptions-item v-if="type!='SPECIAL'" style="font-size: 15px" label="优惠券详情:">

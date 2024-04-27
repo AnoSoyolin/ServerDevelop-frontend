@@ -21,6 +21,7 @@ const userId = Number(sessionStorage.getItem("userId"))
 const roleStoreId = Number(sessionStorage.getItem("storeId"))
 const role=sessionStorage.getItem("role")
 const receivedUserId: Ref<number[]> = ref([])
+const AllName = ref([])
 getCouponDetail()
 const checkDialogVisible=ref(false)
 
@@ -28,19 +29,17 @@ function closeCheckDialog() {
   checkDialogVisible.value = false;
 }
 
-const names : Ref<String[]>= ref([])
 
-function getUserName(userId: number) {
-  getNameByUserId(userId)
+function getUserName() {
+  getNameByUserId(receivedUserId.value)
       .then(res => {
-        const name=ref('');
-        name.value=res.data.result.name;
-        names.value.push(name.value);
+        AllName.value = res.result
       })
 }
 
 function openCheckDialog() {
   checkDialogVisible.value = true;
+  getUserName();
 }
 function getCouponDetail() {
   getGroupByGroupId(props.groupId).then(res => {
@@ -149,11 +148,8 @@ function handleReceive() {
         @close="closeCheckDialog">
 
       <el-text>
-        <el-form-item v-for="userId in receivedUserId" key= userId >
-          {{userId}}
-        </el-form-item>
-        <el-form-item v-for="userId in receivedUserId" key= userId >
-          {{getUserName(userId)}}
+        <el-form-item v-for="name in AllName" :key="name" class="custom-form-item">
+          {{ name }}
         </el-form-item>
       </el-text>
 
@@ -185,5 +181,10 @@ function handleReceive() {
 .no-border-button {
   border: none;
   width: 55px;
+}
+
+.custom-form-item {
+  display: inline-block;
+  margin-right: 2em;
 }
 </style>

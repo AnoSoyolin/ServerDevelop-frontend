@@ -55,9 +55,14 @@ export const getGroupByGroupId = (groupId: number) => {
             return res
         })
 }
-export const getNameByUserId = (userId:number) => {
-    return axios.get(`${COUPON_MODULE}/getUserName/?userId=${userId}`)
+export const getNameByUserId = (userId: number[]) => {
+    const userIds = userId.join(',');
+    return axios.get(`${COUPON_MODULE}/getUserName/?userId=${userIds}`)
         .then(res => {
-            return res
+            return res.data;
         })
+        .catch(error => {
+            console.error(error);
+            throw error;
+        });
 }

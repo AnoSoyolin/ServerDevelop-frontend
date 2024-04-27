@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {Ref, ref} from "vue"
-import {getGroupByGroupId, receiveCoupon} from "../api/coupon.ts";
+import {getGroupByGroupId, receiveCoupon,getNameByUserId} from "../api/coupon.ts";
 import {getStoreById} from "../api/store.ts";
 
 const props = defineProps({
@@ -23,9 +23,22 @@ const role=sessionStorage.getItem("role")
 const receivedUserId: Ref<number[]> = ref([])
 getCouponDetail()
 const checkDialogVisible=ref(false)
+
 function closeCheckDialog() {
   checkDialogVisible.value = false;
 }
+
+const names : Ref<String[]>= ref([])
+
+function getUserName(userId: number) {
+  getNameByUserId(userId)
+      .then(res => {
+        const name=ref('');
+        name.value=res.data.result.name;
+        names.value.push(name.value);
+      })
+}
+
 function openCheckDialog() {
   checkDialogVisible.value = true;
 }
@@ -90,7 +103,6 @@ function handleReceive() {
     }
   })
 }
-
 </script>
 
 
@@ -139,6 +151,9 @@ function handleReceive() {
       <el-text>
         <el-form-item v-for="userId in receivedUserId" key= userId >
           {{userId}}
+        </el-form-item>
+        <el-form-item v-for="userId in receivedUserId" key= userId >
+          {{getUserName(userId)}}
         </el-form-item>
       </el-text>
 

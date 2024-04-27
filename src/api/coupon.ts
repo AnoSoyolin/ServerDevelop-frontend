@@ -55,3 +55,9 @@ export const getGroupByGroupId = (groupId: number) => {
             return res
         })
 }
+export const getNameByUserId = (userId:number) => {
+    return axios.get(`${COUPON_MODULE}/getUserName/?userId=${userId}`)
+        .then(res => {
+            return res
+        })
+}

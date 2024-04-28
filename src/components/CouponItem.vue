@@ -138,7 +138,7 @@ function handleReceive() {
     <el-button v-if="role==='CUSTOMER'" @click="handleReceive" class="receive-button" size="small" type="primary">
       领取
     </el-button>
-    <el-button v-if="role!='CUSTOMER'" @click="openCheckDialog" type="primary" class="button" plain>
+    <el-button v-if="(role ==='MANAGER' && storeId === 0) || (storeId != 0 && role != 'CUSTOMER')" @click="openCheckDialog" type="primary" class="button" plain>
       查看领取者
     </el-button>
     <el-dialog

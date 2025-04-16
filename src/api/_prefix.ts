@@ -5,10 +5,9 @@ export const API_MODULE = '/api'
 export const USER_MODULE = `${API_MODULE}/users`
 //商店模块
 export const STORE_MODULE = `${API_MODULE}/stores`
-//商品模块
-export const PRODUCT_MODULE = `${API_MODULE}/products`
-//订单模块
-export const ORDER_MODULE= `${API_MODULE}/orders`
 
-//Lab4新增
-export const COUPON_MODULE= `${API_MODULE}/coupons`
+export const TASK_MODULE = `${API_MODULE}/task`
+
+export const RAG_MODULE = `${API_MODULE}/eva/RAG`
+
+export const PROMPT_MODULE = `${API_MODULE}/eva/prompt`

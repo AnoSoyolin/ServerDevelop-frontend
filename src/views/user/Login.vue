@@ -1,132 +1,113 @@
+<template>
+  <div class="login-container">
+    <el-card class="login-card">
+      <h2>登录</h2>
+      <el-form :model="loginForm" :rules="rules" ref="loginFormRef">
+        <el-form-item prop="phone">
+          <el-input v-model="loginForm.phone" placeholder="请输入手机号" prefix-icon="el-icon-mobile-phone"></el-input>
+        </el-form-item>
+        <el-form-item prop="password">
+          <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" prefix-icon="el-icon-lock" show-password></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleLogin" :loading="loading" style="width: 100%">登录</el-button>
+        </el-form-item>
+        <div class="register-link">
+          <span>还没有账号？</span>
+          <router-link to="/register">立即注册</router-link>
+        </div>
+      </el-form>
+    </el-card>
+  </div>
+</template>
+
 <script setup lang="ts">
-import {ElForm, ElFormItem} from "element-plus"
-import {ref, computed} from 'vue'
-import {router} from '../../router'
-import {userInfo, userLogin} from "../../api/user.ts"
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { userLogin } from './../../api/user'
 
-// 输入框值（需要在前端拦截不合法输入：是否为空+额外规则）
-const tel = ref('')
-const password = ref('')
+const router = useRouter()
+const loginFormRef = ref()
+const loading = ref(false)
 
-// 电话号码是否为空
-const hasTelInput = computed(() => tel.value != '')
-// 密码是否为空
-const hasPasswordInput = computed(() => password.value != '')
-// 电话号码的规则
-const chinaMobileRegex = /^1(3[0-9]|4[579]|5[0-35-9]|6[2567]|7[0-8]|8[0-9]|9[189])\d{8}$/
-const telLegal = computed(() => chinaMobileRegex.test(tel.value))
-// 密码不设置特殊规则
-// 登录按钮可用性
-const loginDisabled = computed(() => {
-  return !(hasTelInput.value && telLegal.value && hasPasswordInput.value)
+const loginForm = reactive({
+  phone: '',
+  password: ''
 })
 
-// 登录按钮触发
-function handleLogin() {
-  userLogin({
-    phone: tel.value,
-    password: password.value
-  }).then(res => {
-    if (res.data.code === '000') {
-      ElMessage({
-        message: "登录成功！",
-        type: 'success',
-        center: true,
-      })
-      const token = res.data.result
-      sessionStorage.setItem('token', token)
+const rules = {
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码长度不能小于6位', trigger: 'blur' }
+  ]
+}
 
-      userInfo().then(res => {
-        sessionStorage.setItem('name', res.data.result.name)
-        sessionStorage.setItem('role', res.data.result.role)
-        sessionStorage.setItem('userId', res.data.result.id)
-        if (res.data.result.role === 'STAFF') {
-          sessionStorage.setItem('storeId', res.data.result.storeId)
+const handleLogin = async () => {
+  if (!loginFormRef.value) return
+  
+  await loginFormRef.value.validate(async (valid: boolean) => {
+    if (valid) {
+      loading.value = true
+      try {
+        const res = await userLogin(loginForm)
+        if (res.data) {
+          sessionStorage.setItem('token', res.data)
+          ElMessage.success('登录成功')
+          router.push('/rag')
         }
-        router.push({path: "/allStore"})
-      })
-    } else if (res.data.code === '400') {
-      ElMessage({
-        message: res.data.msg,
-        type: 'error',
-        center: true,
-      })
-      password.value = ''
+      } catch (error) {
+        ElMessage.error('登录失败，请检查账号密码')
+      } finally {
+        loading.value = false
+      }
     }
   })
 }
 </script>
 
-
-<template>
-  <el-main class="main-frame bgimage">
-    <el-card class="login-card">
-      <div>
-        <h1>登入您的账户</h1>
-        <el-form>
-          <el-form-item>
-            <label v-if="!hasTelInput" for="tel">注册手机号</label>
-            <label v-else-if="!telLegal" for="tel" class="error-warn">手机号不合法</label>
-            <label v-else for="tel">注册手机号</label>
-            <el-input id="tel" type="text" v-model="tel"
-                      required :class="{'error-warn-input' :(hasTelInput && !telLegal)}"
-                      placeholder="请输入手机号"/>
-          </el-form-item>
-
-          <el-form-item>
-            <label for="password">账户密码</label>
-            <el-input id="password" type="password" v-model="password"
-                      required
-                      placeholder="••••••••"/>
-          </el-form-item>
-
-          <span class="button-group">
-              <el-button @click.prevent="handleLogin" :disabled="loginDisabled"
-                         type="primary">登入</el-button>
-              <router-link to="/register" v-slot="{navigate}">
-                <el-button @click="navigate">去注册</el-button>
-              </router-link>
-          </span>
-        </el-form>
-      </div>
-    </el-card>
-  </el-main>
-</template>
-
-
 <style scoped>
-.main-frame {
-  width: 100%;
-  height: 100%;
-
+.login-container {
   display: flex;
-  align-items: center;
   justify-content: center;
-}
-
-.bgimage {
-  background-image: url("../../assets/shopping-1s-1084px.svg");
+  align-items: center;
+  height: 100vh; /* 占满整个屏幕高度 */
+  background-color: #f5f7fa;
+  margin: 0; /* 移除默认外边距 */
 }
 
 .login-card {
-  width: 60%;
-  padding: 10px;
+  width: 100%; /* 占满宽度 */
+  max-width: 400px; /* 设置最大宽度 */
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  background-color: #fff; /* 设置背景色 */
+  border-radius: 8px; /* 圆角 */
 }
 
-.error-warn {
-  color: red;
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #409EFF;
 }
 
-.error-warn-input {
-  --el-input-focus-border-color: red;
+.register-link {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
 }
 
-.button-group {
-  padding-top: 10px;
-  display: flex;
-  flex-direction: row;
-  gap: 30px;
-  align-items: center;
-  justify-content: right;
+.register-link a {
+  color: #409EFF;
+  text-decoration: none;
+  margin-left: 5px;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
 }
 </style>

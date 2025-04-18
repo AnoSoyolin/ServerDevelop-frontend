@@ -101,20 +101,24 @@ const handleRegister = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* 占满整个屏幕高度 */
+  height: 100%;
+  width: 100%;
   background-color: #f5f7fa;
-  margin: 0; /* 移除默认外边距 */
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .register-card {
-  width: 100%; /* 占满宽度 */
-  max-width: 400px; /* 设置最大宽度 */
+  width: 100%;
+  max-width: 400px;
   padding: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
-  background-color: #fff; /* 设置背景色 */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border-radius: 8px;
 }
 
-  h2 {
+h2 {
   text-align: center;
   margin-bottom: 30px;
   color: #409EFF;

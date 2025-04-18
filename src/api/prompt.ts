@@ -2,11 +2,12 @@ import {axios} from '../utils/request'
 import {PROMPT_MODULE} from './_prefix'
 
 //创建提示
-export const createPrompt = (evaluationVO: any) => {
-    return axios.post(`${PROMPT_MODULE}/create`, evaluationVO, {headers: {'Content-Type': 'application/json'}})
-        .then(res => {
-            return res
-        })
+export const createPrompt = (taskId: number, evaluationVO: any) => {
+    return axios.post(`${PROMPT_MODULE}/create?taskId=${taskId}`, evaluationVO, {
+        headers: {'Content-Type': 'application/json'}
+    }).then(res => {
+        return res
+    })
 }
 
 //获取所有提示

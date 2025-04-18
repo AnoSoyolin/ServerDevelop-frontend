@@ -26,10 +26,12 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { userLogin } from './../../api/user'
+import { useAuthStore } from '../../store/auth'
 
 const router = useRouter()
 const loginFormRef = ref()
 const loading = ref(false)
+const authStore = useAuthStore()
 
 const loginForm = reactive({
   phone: '',
@@ -56,7 +58,9 @@ const handleLogin = async () => {
       try {
         const res = await userLogin(loginForm)
         if (res.data) {
-          sessionStorage.setItem('token', res.data)
+          localStorage.setItem('token', res.data.result)
+          localStorage.setItem('userPhone', loginForm.phone)
+          authStore.updateAuthState(true, loginForm.phone)
           ElMessage.success('登录成功')
           router.push('/rag')
         }
@@ -75,18 +79,21 @@ const handleLogin = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* 占满整个屏幕高度 */
+  height: 100%;
+  width: 100%;
   background-color: #f5f7fa;
-  margin: 0; /* 移除默认外边距 */
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .login-card {
-  width: 100%; /* 占满宽度 */
-  max-width: 400px; /* 设置最大宽度 */
+  width: 100%;
+  max-width: 400px;
   padding: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
-  background-color: #fff; /* 设置背景色 */
-  border-radius: 8px; /* 圆角 */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border-radius: 8px;
 }
 
 h2 {

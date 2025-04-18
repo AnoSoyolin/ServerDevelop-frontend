@@ -1,16 +1,19 @@
-import {createRouter, createWebHashHistory} from "vue-router"
+import {createRouter, createWebHistory} from "vue-router"
+import type { RouteRecordRaw } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
-const router = createRouter({
-    history: createWebHashHistory(),
-    routes: [{
+const routes: RouteRecordRaw[] = [
+    {
         path: '/',
         redirect: '/login',
     }, {
         path: '/login',
+        name: 'Login',
         component: () => import('../views/user/Login.vue'),
         meta: {title: '用户登录'}
     }, {
         path: '/register',
+        name: 'Register',
         component: () => import('../views/user/Register.vue'),
         meta: {title: '用户注册'}
     }, {
@@ -27,11 +30,19 @@ const router = createRouter({
         ]
     }, {
         path: '/rag',
-        name: 'RAGEvaluation',
-        component: () => import('../views/RAGEvaluation.vue')
-    }, { path: '/prompt',
-        name: 'PromptEvaluation',
-        component: () => import('../views/PromptEvaluation.vue')
+        name: 'RAG',
+        component: () => import('../views/RAGEvaluation.vue'),
+        meta: { requiresAuth: true }
+    }, {
+        path: '/prompt',
+        name: 'Prompt',
+        component: () => import('../views/PromptEvaluation.vue'),
+        meta: { requiresAuth: true }
+    }, {
+        path: '/profile',
+        name: 'Profile',
+        component: () => import('../views/Profile.vue'),
+        meta: { requiresAuth: true }
     }, {
         path: '/404',
         name: '404',
@@ -41,32 +52,22 @@ const router = createRouter({
         path: '/:catchAll(.*)',
         redirect: '/404'
     }]
+
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes
 })
 
-router.beforeEach((to, _, next) => {
-    const token: string | null = sessionStorage.getItem('token')
-    const role: string | null = sessionStorage.getItem('role')
-
-    if (to.meta.title) {
-        document.title = to.meta.title
+router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem('token')
+    
+    if (to.meta.requiresAuth && !token) {
+        ElMessage.error('请先登录')
+        next('/login')
+    } else {
+        next()
     }
-
-    if (!token) {
-        if (to.path === '/login' || to.path === '/register') {
-            next()
-        } else {
-            next('/login')
-        }
-        return
-    }
-
-    if (to.meta.permission && !to.meta.permission.includes(role!)) {
-        next('/404')
-        return
-    }
-
-    next()
 })
-
 
 export {router}

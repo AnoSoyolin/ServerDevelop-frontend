@@ -8,6 +8,6 @@ export const STORE_MODULE = `${API_MODULE}/stores`
 
 export const TASK_MODULE = `${API_MODULE}/task`
 
-export const RAG_MODULE = `${API_MODULE}/eva/RAG`
+export const RAG_MODULE = `${API_MODULE}/eval/rag`
 
-export const PROMPT_MODULE = `${API_MODULE}/eva/prompt`
+export const PROMPT_MODULE = `${API_MODULE}/eval/prompt`

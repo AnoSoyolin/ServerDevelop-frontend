@@ -1,132 +1,365 @@
 <!-- src/pages/PromptEvaluation.vue -->
 <template>
-  <div class="prompt-evaluation">
-    <h2>Prompt 评估</h2>
-    <form @submit.prevent="addTask">
-      <input v-model="newTask" placeholder="输入 Prompt 任务名称" required />
-      <button type="submit">添加任务</button>
-    </form>
-    <ul>
-      <li v-for="(task, index) in tasks" :key="index">
-        <div>
-          <h3>{{ task.name }}</h3>
-          <p>创建时间：{{ task.createTime }}</p>
-          <p>评估轮次：{{ task.evaluations.length }}</p>
-          <p>优化轮次：{{ task.optimizations.length }}</p>
-        </div>
-        <button @click="selectTask(index)">查看详情</button>
-        <button @click="deleteTask(index)">删除</button>
-      </li>
-    </ul>
-    <div v-if="selectedTask" class="task-detail">
-      <h3>任务详情 - {{ selectedTask.name }}</h3>
-      <!-- 使用 EvaluationChart 展示评估数据 -->
-      <EvaluationChart :data="selectedTask.evaluations" evaluationType="Prompt" />
-      <!-- 展示优化记录 -->
-      <div class="optimizations">
-        <h4>优化记录</h4>
-        <ul>
-          <li v-for="(opt, idx) in selectedTask.optimizations" :key="idx">
-            <strong>轮次{{ opt.round }}:</strong> {{ opt.description }}
-          </li>
-        </ul>
-        <button @click="addOptimization">添加优化</button>
-      </div>
+  <div class="prompt-container">
+    <!-- 任务管理区域 -->
+    <div class="task-management">
+      <el-card class="task-card">
+        <template #header>
+          <div class="card-header">
+            <span>Prompt评估任务管理</span>
+            <el-button type="primary" @click="showCreateTaskDialog">创建任务</el-button>
+          </div>
+        </template>
+        
+        <!-- 任务列表 -->
+        <el-table :data="tasks" style="width: 100%">
+          <el-table-column prop="name" label="任务名称" />
+          <el-table-column prop="description" label="描述" />
+          <el-table-column prop="type" label="类型" />
+          <el-table-column label="操作" width="200">
+            <template #default="scope">
+              <el-button type="primary" size="small" @click="showEvaluationDialog(scope.row)">评估</el-button>
+              <el-button type="danger" size="small" @click="deleteTask(scope.row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-card>
     </div>
+
+    <!-- 评估区域 -->
+    <div class="evaluation-area" v-if="selectedTask">
+      <el-card class="evaluation-card">
+        <template #header>
+          <div class="card-header">
+            <span>评估记录 - {{ selectedTask.name }}</span>
+            <el-button type="primary" @click="showNewEvaluationDialog">新增评估</el-button>
+          </div>
+        </template>
+
+        <!-- 评估记录表格 -->
+        <el-table :data="evaluations" style="width: 100%">
+          <el-table-column prop="round_num" label="轮次" />
+          <el-table-column prop="prompt" label="Prompt内容" />
+          <el-table-column label="评估指标">
+            <template #default="scope">
+              <el-tag v-for="metric in scope.row.metrics" :key="metric" class="metric-tag">
+                {{ metric }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="结果">
+            <template #default="scope">
+              <el-tag v-for="(result, index) in scope.row.results" :key="index" class="result-tag">
+                {{ result }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="150">
+            <template #default="scope">
+              <el-button type="primary" size="small" @click="showOptimizeDialog(scope.row)">优化</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <!-- 可视化图表 -->
+        <div class="chart-container" v-if="evaluations.length > 0">
+          <div class="chart-title">评估指标趋势</div>
+          <div ref="chartRef" class="chart"></div>
+        </div>
+      </el-card>
+    </div>
+
+    <!-- 创建任务对话框 -->
+    <el-dialog v-model="createTaskDialogVisible" title="创建Prompt评估任务">
+      <el-form :model="newTask" :rules="taskRules" ref="taskFormRef">
+        <el-form-item label="任务名称" prop="name">
+          <el-input v-model="newTask.name" placeholder="请输入任务名称" />
+        </el-form-item>
+        <el-form-item label="描述" prop="description">
+          <el-input v-model="newTask.description" type="textarea" placeholder="请输入任务描述" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="createTaskDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="createTask">确认</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 新增评估对话框 -->
+    <el-dialog v-model="evaluationDialogVisible" title="新增评估">
+      <el-form :model="newEvaluation" :rules="evaluationRules" ref="evaluationFormRef">
+        <el-form-item label="Prompt内容" prop="prompt">
+          <el-input v-model="newEvaluation.prompt" type="textarea" placeholder="请输入Prompt内容" />
+        </el-form-item>
+        <el-form-item label="评估指标" prop="metrics">
+          <el-select v-model="newEvaluation.metrics" multiple placeholder="请选择评估指标">
+            <el-option label="相关性" value="relevance" />
+            <el-option label="完整性" value="completeness" />
+            <el-option label="清晰度" value="clarity" />
+            <el-option label="一致性" value="consistency" />
+            <el-option label="自定义指标" value="custom" />
+          </el-select>
+        </el-form-item>
+        <el-form-item v-if="newEvaluation.metrics.includes('custom')" label="自定义指标" prop="customMetric">
+          <el-input v-model="newEvaluation.customMetric" placeholder="请输入自定义指标名称" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="evaluationDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="createEvaluation">确认</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 优化对话框 -->
+    <el-dialog v-model="optimizeDialogVisible" title="优化Prompt">
+      <el-form :model="optimizedPrompt" :rules="optimizeRules" ref="optimizeFormRef">
+        <el-form-item label="当前Prompt" prop="currentPrompt">
+          <el-input v-model="optimizedPrompt.currentPrompt" type="textarea" disabled />
+        </el-form-item>
+        <el-form-item label="优化建议" prop="suggestions">
+          <el-input v-model="optimizedPrompt.suggestions" type="textarea" placeholder="请输入优化建议" />
+        </el-form-item>
+        <el-form-item label="优化后的Prompt" prop="optimizedPrompt">
+          <el-input v-model="optimizedPrompt.optimizedPrompt" type="textarea" placeholder="请输入优化后的Prompt" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="optimizeDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitOptimization">确认</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue'
-import EvaluationChart from '../components/EvaluationChart.vue'
+<script setup lang="ts">
+import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ElMessage } from 'element-plus'
+import { createTask, getAllTasks, deleteTask, getCharts } from './../api/task'
+import { createPromptEvaluation, getAllPromptEvaluations, optimizePrompt } from './../api/prompt'
+import * as echarts from 'echarts'
 
-const newTask = ref('')
-// 每个任务格式：
-// { name, createTime, evaluations: [ { round, accuracy, recall } ], optimizations: [ { round, description } ] }
+// 任务相关
 const tasks = ref([])
-const selectedTaskIndex = ref(null)
+const selectedTask = ref(null)
+const createTaskDialogVisible = ref(false)
+const newTask = reactive({
+  name: '',
+  description: '',
+  type: 'Prompt'
+})
 
-function addTask() {
-  const task = {
-    name: newTask.value,
-    createTime: new Date().toLocaleString(),
-    evaluations: [
-      { round: 1, accuracy: Math.floor(Math.random() * 20) + 70, recall: Math.floor(Math.random() * 20) + 60 },
-      { round: 2, accuracy: Math.floor(Math.random() * 20) + 70, recall: Math.floor(Math.random() * 20) + 60 }
-    ],
-    optimizations: []  // 优化记录为空
+// 评估相关
+const evaluations = ref([])
+const evaluationDialogVisible = ref(false)
+const newEvaluation = reactive({
+  prompt: '',
+  metrics: [],
+  customMetric: '',
+  results: []
+})
+
+// 优化相关
+const optimizeDialogVisible = ref(false)
+const optimizedPrompt = reactive({
+  currentPrompt: '',
+  suggestions: '',
+  optimizedPrompt: ''
+})
+
+// 图表相关
+const chartRef = ref()
+let chart = null
+
+// 表单验证规则
+const taskRules = {
+  name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
+  description: [{ required: true, message: '请输入任务描述', trigger: 'blur' }]
+}
+
+const evaluationRules = {
+  prompt: [{ required: true, message: '请输入Prompt内容', trigger: 'blur' }],
+  metrics: [{ required: true, message: '请选择评估指标', trigger: 'change' }],
+  customMetric: [{ required: true, message: '请输入自定义指标名称', trigger: 'blur' }]
+}
+
+const optimizeRules = {
+  suggestions: [{ required: true, message: '请输入优化建议', trigger: 'blur' }],
+  optimizedPrompt: [{ required: true, message: '请输入优化后的Prompt', trigger: 'blur' }]
+}
+
+// 初始化
+onMounted(async () => {
+  await fetchTasks()
+  initChart()
+})
+
+// 获取任务列表
+const fetchTasks = async () => {
+  try {
+    const res = await getAllTasks()
+    tasks.value = res.data
+  } catch (error) {
+    ElMessage.error('获取任务列表失败')
   }
-  tasks.value.push(task)
-  newTask.value = ''
 }
 
-function deleteTask(index) {
-  tasks.value.splice(index, 1)
-  if (selectedTaskIndex.value === index) {
-    selectedTaskIndex.value = null
+// 创建任务
+const createTask = async () => {
+  try {
+    await createTask(newTask)
+    ElMessage.success('创建任务成功')
+    createTaskDialogVisible.value = false
+    await fetchTasks()
+  } catch (error) {
+    ElMessage.error('创建任务失败')
   }
 }
 
-function selectTask(index) {
-  selectedTaskIndex.value = index
+// 删除任务
+const handleDeleteTask = async (taskId: number) => {
+  try {
+    await deleteTask(taskId)
+    ElMessage.success('删除任务成功')
+    await fetchTasks()
+  } catch (error) {
+    ElMessage.error('删除任务失败')
+  }
 }
 
-const selectedTask = computed(() => tasks.value[selectedTaskIndex.value] || null)
+// 显示评估对话框
+const showEvaluationDialog = (task) => {
+  selectedTask.value = task
+  fetchEvaluations(task.id)
+}
 
-// 添加优化记录，同时新增一轮评估数据（模拟优化后效果）
-function addOptimization() {
-  if (selectedTask.value) {
-    const newOptRound = selectedTask.value.optimizations.length + 1
-    const description = "优化建议：调整参数，尝试不同的 prompt 模板。"
-    selectedTask.value.optimizations.push({
-      round: newOptRound,
-      description
+// 获取评估记录
+const fetchEvaluations = async (taskId: number) => {
+  try {
+    const res = await getAllPromptEvaluations()
+    evaluations.value = res.data
+    updateChart()
+  } catch (error) {
+    ElMessage.error('获取评估记录失败')
+  }
+}
+
+// 创建评估
+const createEvaluation = async () => {
+  try {
+    await createPromptEvaluation({
+      ...newEvaluation,
+      taskId: selectedTask.value.id
     })
-    // 在评估数据中增加一轮（模拟优化后新轮次数据）
-    const newEvalRound = selectedTask.value.evaluations.length + 1
-    selectedTask.value.evaluations.push({
-      round: newEvalRound,
-      accuracy: Math.floor(Math.random() * 20) + 70,
-      recall: Math.floor(Math.random() * 20) + 60
+    ElMessage.success('创建评估成功')
+    evaluationDialogVisible.value = false
+    await fetchEvaluations(selectedTask.value.id)
+  } catch (error) {
+    ElMessage.error('创建评估失败')
+  }
+}
+
+// 显示优化对话框
+const showOptimizeDialog = (evaluation) => {
+  optimizedPrompt.currentPrompt = evaluation.prompt
+  optimizedPrompt.suggestions = ''
+  optimizedPrompt.optimizedPrompt = ''
+  optimizeDialogVisible.value = true
+}
+
+// 提交优化
+const submitOptimization = async () => {
+  try {
+    await optimizePrompt({
+      taskId: selectedTask.value.id,
+      ...optimizedPrompt
     })
+    ElMessage.success('优化成功')
+    optimizeDialogVisible.value = false
+    await fetchEvaluations(selectedTask.value.id)
+  } catch (error) {
+    ElMessage.error('优化失败')
+  }
+}
+
+// 初始化图表
+const initChart = () => {
+  chart = echarts.init(chartRef.value)
+}
+
+// 更新图表
+const updateChart = async () => {
+  if (!selectedTask.value) return
+  
+  try {
+    const res = await getCharts(selectedTask.value.id)
+    const option = {
+      title: {
+        text: '评估指标趋势'
+      },
+      tooltip: {
+        trigger: 'axis'
+      },
+      legend: {
+        data: res.data.metrics
+      },
+      xAxis: {
+        type: 'category',
+        data: res.data.rounds
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: res.data.metrics.map(metric => ({
+        name: metric,
+        type: 'line',
+        data: res.data.results[metric]
+      }))
+    }
+    chart.setOption(option)
+  } catch (error) {
+    ElMessage.error('获取图表数据失败')
   }
 }
 </script>
 
 <style scoped>
-.prompt-evaluation {
-  border: 1px solid #ccc;
+.prompt-container {
   padding: 20px;
-  border-radius: 4px;
 }
-.prompt-evaluation form {
-  display: flex;
-  gap: 10px;
+
+.task-management {
   margin-bottom: 20px;
 }
-.prompt-evaluation ul {
-  list-style: none;
-  padding: 0;
-}
-.prompt-evaluation li {
+
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
 }
-.task-detail {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+
+.metric-tag, .result-tag {
+  margin-right: 5px;
+  margin-bottom: 5px;
 }
-.optimizations {
+
+.chart-container {
   margin-top: 20px;
 }
-.optimizations ul {
-  list-style: none;
-  padding: 0;
-}
-.optimizations li {
+
+.chart-title {
+  font-size: 16px;
+  font-weight: bold;
   margin-bottom: 10px;
+}
+
+.chart {
+  height: 400px;
+  width: 100%;
 }
 </style>

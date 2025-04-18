@@ -17,10 +17,11 @@ export interface Task {
 
 export interface Evaluation {
   id: number;
-  round_num: number;
+  roundNum: number;
   dataset: string;
+  prompt:string;
   metrics: string[];
-  results: string[];
+  results: number[];
   task: Task;
 }
 

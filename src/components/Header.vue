@@ -20,7 +20,7 @@ function logout() {
         center: true
       }
   ).then(() => {
-    sessionStorage.setItem('token', '')
+    localStorage.setItem('token', '')
     router.push({path: "/login"})
   })
 }

@@ -34,8 +34,8 @@ export const getTask = (taskId: number) => {
 }
 
 // 获取任务统计图
-export const getCharts = (taskId: number) => {
-    return axios.get(`${TASK_MODULE}/getCharts/${taskId}`)
+export const getCharts = (taskId: number,metric: string) => {
+    return axios.get(`${TASK_MODULE}/getCharts/${taskId}?metric=${metric}`)
         .then(res => {
             return res
         })
